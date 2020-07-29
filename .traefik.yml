@@ -1,0 +1,10 @@
+displayName: DenyIP Plugin
+type: middleware
+
+import: github.com/notsureifkevin/denyip
+
+summary: '[Demo] Deny IP address'
+
+testData:
+  ipDenyList:
+    - 127.0.0.1
