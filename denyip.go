@@ -65,6 +65,7 @@ func (a *denyIP) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		if isBlocked {
 			log.Printf("denyIP: request denied [%s]", reqIPAddr[i])
 			rw.WriteHeader(http.StatusForbidden)
+
 			return
 		}
 	}
