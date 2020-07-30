@@ -63,6 +63,7 @@ func (a *denyIP) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		if isBlocked {
+			log.Printf("denyIP: request denied [%s]", reqIPAddr[i])
 			rw.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -78,68 +79,51 @@ func (a *denyIP) GetRemoteIP(req *http.Request) []string {
 	xff := req.Header.Get(xForwardedFor)
 	xffs := strings.Split(xff, ",")
 
-	log.Printf("xff: %v", xff)
-	log.Printf("xffs: %v", xffs)
-
 	for i := len(xffs) - 1; i >= 0; i-- {
-		ipList = append(ipList, strings.TrimSpace(xffs[i]))
+		xffsTrim := strings.TrimSpace(xffs[i])
+
+		if len(xffsTrim) > 0 {
+			ipList = append(ipList, xffsTrim)
+		}
 	}
 
 	ip, _, err := net.SplitHostPort(req.RemoteAddr)
 	if err != nil {
-		log.Printf("req.RemoteAddr: %v", req.RemoteAddr)
-		ipList = append(ipList, strings.TrimSpace(req.RemoteAddr))
+		remoteAddrTrim := strings.TrimSpace(req.RemoteAddr)
+		if len(remoteAddrTrim) > 0 {
+			ipList = append(ipList, remoteAddrTrim)
+		}
 	} else {
-		log.Printf("ip: %v", ip)
-		ipList = append(ipList, strings.TrimSpace(ip))
+		ipTrim := strings.TrimSpace(ip)
+		if len(ipTrim) > 0 {
+			ipList = append(ipList, ipTrim)
+		}
 	}
 
 	return ipList
 }
 
-// NewChecker builds a new Checker given a list of CIDR-Strings to trusted IPs.
-func NewChecker(trustedIPs []string) (*Checker, error) {
-	if len(trustedIPs) == 0 {
-		return nil, errors.New("no trusted IPs provided")
+// NewChecker builds a new Checker given a list of CIDR-Strings to denied IPs.
+func NewChecker(deniedIPs []string) (*Checker, error) {
+	if len(deniedIPs) == 0 {
+		return nil, errors.New("no denied IPs provided")
 	}
 
 	checker := &Checker{}
 
-	for _, ipMask := range trustedIPs {
+	for _, ipMask := range deniedIPs {
 		if ipAddr := net.ParseIP(ipMask); ipAddr != nil {
 			checker.denyIPs = append(checker.denyIPs, &ipAddr)
 		} else {
 			_, ipAddr, err := net.ParseCIDR(ipMask)
 			if err != nil {
-				return nil, fmt.Errorf("parsing CIDR trusted IPs %s: %w", ipAddr, err)
+				return nil, fmt.Errorf("parsing CIDR denied IPs %s: %w", ipAddr, err)
 			}
 			checker.denyIPsNet = append(checker.denyIPsNet, ipAddr)
 		}
 	}
 
 	return checker, nil
-}
-
-// IsDenied checks if provided request is denied by the denied IPs.
-func (ip *Checker) IsDenied(addr string) error {
-	var invalidMatches []string
-
-	host, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		host = addr
-	}
-
-	ok, err := ip.Contains(host)
-	if err != nil {
-		return err
-	}
-
-	if !ok {
-		invalidMatches = append(invalidMatches, addr)
-		return fmt.Errorf("%q matched none of the trusted IPs", strings.Join(invalidMatches, ", "))
-	}
-
-	return nil
 }
 
 // Contains checks if provided address is in the denied IPs.
@@ -156,7 +140,7 @@ func (ip *Checker) Contains(addr string) (bool, error) {
 	return ip.ContainsIP(ipAddr), nil
 }
 
-// ContainsIP checks if provided address is in the trusted IPs.
+// ContainsIP checks if provided address is in the denied IPs.
 func (ip *Checker) ContainsIP(addr net.IP) bool {
 	for _, deniedIP := range ip.denyIPs {
 		if deniedIP.Equal(addr) {
@@ -176,7 +160,7 @@ func (ip *Checker) ContainsIP(addr net.IP) bool {
 func parseIP(addr string) (net.IP, error) {
 	userIP := net.ParseIP(addr)
 	if userIP == nil {
-		return nil, fmt.Errorf("can't parse IP from address %s", addr)
+		return nil, fmt.Errorf("unable parse IP from address %s", addr)
 	}
 
 	return userIP, nil

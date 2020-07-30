@@ -6,7 +6,7 @@ DenyIP is a middleware plugin for [Traefik](https://github.com/containous/traefi
 
 ### Static
 
-In the example below insecure fowardedHeaders are enabled in order to allow the IP address to be available from proxied requests. In a production environment, you may want to consider using [`forwardedHeaders.trustedIPs`](https://docs.traefik.io/routing/entrypoints/#forwarded-headers)
+In the example below `fowardedHeaders.insecure` is enabled in order to allow the IP address to be available from proxied requests. In a production environment, you may want to consider using [`forwardedHeaders.trustedIPs`](https://docs.traefik.io/routing/entrypoints/#forwarded-headers)
 
 ```yaml
 experimental:
@@ -15,7 +15,7 @@ experimental:
   plugins:
     denyip:
       modulename = "github.com/notsureifkevin/denyip"
-      version = "v0.0.1"
+      version = "v0.1.0"
 
 entryPoints:
   http:
