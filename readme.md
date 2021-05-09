@@ -1,6 +1,6 @@
 # DenyIP
 
-DenyIP is a middleware plugin for [Traefik](https://github.com/containous/traefik) which accepts IP addresses or IP address ranges and blocks requests originating from those IPs.
+DenyIP is a middleware plugin for [Traefik](https://github.com/traefik/traefik) which accepts IP addresses or IP address ranges and blocks requests originating from those IPs.
 
 ## Configuration
 
@@ -14,8 +14,8 @@ experimental:
     token: "xxxxx"
   plugins:
     denyip:
-      modulename = "github.com/notsureifkevin/denyip"
-      version = "v0.1.0"
+      modulename = "github.com/kevtainer/denyip"
+      version = "v1.0.0"
 
 entryPoints:
   http:

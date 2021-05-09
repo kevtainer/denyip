@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/notsureifkevin/denyip"
+	"github.com/kevtainer/denyip"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

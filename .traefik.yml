@@ -1,7 +1,7 @@
 displayName: DenyIP Plugin
 type: middleware
 
-import: github.com/notsureifkevin/denyip
+import: github.com/kevtainer/denyip
 
 summary: 'DenyIP is a middleware plugin which accepts IP addresses or IP address ranges and blocks requests originating from those IPs.'
 
